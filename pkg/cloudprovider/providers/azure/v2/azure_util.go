@@ -32,13 +32,14 @@ const (
 	loadBalancerMinimumPriority = 500
 	loadBalancerMaximumPriority = 4096
 
-	machineIDTemplate           = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s"
-	availabilitySetIDTemplate   = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/availabilitySets/%s"
-	frontendIPConfigIDTemplate  = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/loadBalancers/%s/frontendIPConfigurations/%s"
-	backendPoolIDTemplate       = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/loadBalancers/%s/backendAddressPools/%s"
-	loadBalancerRuleIDTemplate  = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/loadBalancers/%s/loadBalancingRules/%s"
-	loadBalancerProbeIDTemplate = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/loadBalancers/%s/probes/%s"
-	securityRuleIDTemplate      = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkSecurityGroups/%s/securityRules/%s"
+	machineIDTemplate                = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s"
+	availabilitySetIDTemplate        = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/availabilitySets/%s"
+	virtualMachineScaleSetIDTemplate = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachineScaleSets/%s"
+	frontendIPConfigIDTemplate       = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/loadBalancers/%s/frontendIPConfigurations/%s"
+	backendPoolIDTemplate            = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/loadBalancers/%s/backendAddressPools/%s"
+	loadBalancerRuleIDTemplate       = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/loadBalancers/%s/loadBalancingRules/%s"
+	loadBalancerProbeIDTemplate      = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/loadBalancers/%s/probes/%s"
+	securityRuleIDTemplate           = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkSecurityGroups/%s/securityRules/%s"
 )
 
 // returns the full identifier of a machine
@@ -57,6 +58,15 @@ func (az *Cloud) getAvailabilitySetID(availabilitySetName string) string {
 		az.SubscriptionID,
 		az.ResourceGroup,
 		availabilitySetName)
+}
+
+// returns the full identifier of a virtualMachineScaleSet Resource
+func (az *Cloud) getVirtualMachineScaleSetID(virtualMachineScaleSetName string) string {
+	return fmt.Sprintf(
+		virtualMachineScaleSetIDTemplate,
+		az.SubscriptionID,
+		az.ResourceGroup,
+		virtualMachineScaleSetName)
 }
 
 // returns the full identifier of a loadbalancer frontendipconfiguration.
@@ -132,12 +142,27 @@ func getProtocolsFromKubernetesProtocol(protocol v1.Protocol) (network.Transport
 }
 
 // This returns the full identifier of the primary NIC for the given VM.
-func getPrimaryInterfaceID(machine compute.VirtualMachine) (string, error) {
+func getVMPrimaryInterfaceID(machine compute.VirtualMachine) (string, error) {
 	if len(*machine.NetworkProfile.NetworkInterfaces) == 1 {
 		return *(*machine.NetworkProfile.NetworkInterfaces)[0].ID, nil
 	}
 
 	for _, ref := range *machine.NetworkProfile.NetworkInterfaces {
+		if *ref.Primary {
+			return *ref.ID, nil
+		}
+	}
+
+	return "", fmt.Errorf("failed to find a primary nic for the vm. vmname=%q", *machine.Name)
+}
+
+// This returns the full identifier of the primary NIC for the given ScaleSet.
+func getScaleSetVMPrimaryInterfaceID(machine compute.VirtualMachineScaleSetVM) (string, error) {
+	if len(*machine.VirtualMachineScaleSetVMProperties.NetworkProfile.NetworkInterfaces) == 1 {
+		return *(*machine.VirtualMachineScaleSetVMProperties.NetworkProfile.NetworkInterfaces)[0].ID, nil
+	}
+
+	for _, ref := range *machine.VirtualMachineScaleSetVMProperties.NetworkProfile.NetworkInterfaces {
 		if *ref.Primary {
 			return *ref.ID, nil
 		}
@@ -224,8 +249,7 @@ func (az *Cloud) getIPForMachine(nodeName types.NodeName) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	nicID, err := getPrimaryInterfaceID(machine)
+	nicID, err := getVMPrimaryInterfaceID(machine)
 	if err != nil {
 		return "", err
 	}

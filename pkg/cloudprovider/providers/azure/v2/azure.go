@@ -22,16 +22,17 @@ import (
 
 	"k8s.io/kubernetes/pkg/cloudprovider"
 
+	"time"
+
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"github.com/Azure/azure-sdk-for-go/arm/network"
 	"github.com/Azure/azure-sdk-for-go/arm/storage"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/ghodss/yaml"
-	"time"
 )
 
 // CloudProviderName is the value used for the --cloud-provider flag
-const CloudProviderName = "azure"
+const CloudProviderName = "azureV2"
 
 // Config holds the configuration parsed from the --cloud-config flag
 // All fields are required unless otherwise specified
@@ -60,6 +61,8 @@ type Config struct {
 	// the cloudprovider will try to add all nodes to a single backend pool which is forbidden.
 	// In other words, if you use multiple agent pools (availability sets), you MUST set this field.
 	PrimaryAvailabilitySetName string `json:"primaryAvailabilitySetName" yaml:"primaryAvailabilitySetName"`
+	// ScaleSetName
+	PrimaryScaleSetName string `json:"primaryScaleSetName" yaml:"primaryScaleSetName"`
 
 	// The ClientID for an AAD application with RBAC access to talk to Azure RM APIs
 	AADClientID string `json:"aadClientId" yaml:"aadClientId"`
@@ -70,16 +73,18 @@ type Config struct {
 // Cloud holds the config and clients
 type Cloud struct {
 	Config
-	Environment             azure.Environment
-	RoutesClient            network.RoutesClient
-	SubnetsClient           network.SubnetsClient
-	InterfacesClient        network.InterfacesClient
-	RouteTablesClient       network.RouteTablesClient
-	LoadBalancerClient      network.LoadBalancersClient
-	PublicIPAddressesClient network.PublicIPAddressesClient
-	SecurityGroupsClient    network.SecurityGroupsClient
-	VirtualMachinesClient   compute.VirtualMachinesClient
-	StorageAccountClient    storage.AccountsClient
+	Environment                     azure.Environment
+	RoutesClient                    network.RoutesClient
+	SubnetsClient                   network.SubnetsClient
+	InterfacesClient                network.InterfacesClient
+	RouteTablesClient               network.RouteTablesClient
+	LoadBalancerClient              network.LoadBalancersClient
+	PublicIPAddressesClient         network.PublicIPAddressesClient
+	SecurityGroupsClient            network.SecurityGroupsClient
+	VirtualMachinesClient           compute.VirtualMachinesClient
+	VirtualMachineScaleSetVMsClient compute.VirtualMachineScaleSetVMsClient
+	VirtualMachineScaleSetsClient   compute.VirtualMachineScaleSetsClient
+	StorageAccountClient            storage.AccountsClient
 }
 
 func init() {
@@ -143,6 +148,16 @@ func NewCloud(configReader io.Reader) (cloudprovider.Interface, error) {
 	az.LoadBalancerClient.Authorizer = servicePrincipalToken
 
 	az.VirtualMachinesClient = compute.NewVirtualMachinesClient(az.SubscriptionID)
+	az.VirtualMachinesClient.BaseURI = az.Environment.ResourceManagerEndpoint
+	az.VirtualMachinesClient.Authorizer = servicePrincipalToken
+	az.VirtualMachinesClient.PollingDelay = 5 * time.Second
+
+	az.VirtualMachineScaleSetVMsClient = compute.NewVirtualMachineScaleSetVMsClient(az.SubscriptionID)
+	az.VirtualMachinesClient.BaseURI = az.Environment.ResourceManagerEndpoint
+	az.VirtualMachinesClient.Authorizer = servicePrincipalToken
+	az.VirtualMachinesClient.PollingDelay = 5 * time.Second
+
+	az.VirtualMachineScaleSetsClient = compute.NewVirtualMachineScaleSetsClient(az.SubscriptionID)
 	az.VirtualMachinesClient.BaseURI = az.Environment.ResourceManagerEndpoint
 	az.VirtualMachinesClient.Authorizer = servicePrincipalToken
 	az.VirtualMachinesClient.PollingDelay = 5 * time.Second
