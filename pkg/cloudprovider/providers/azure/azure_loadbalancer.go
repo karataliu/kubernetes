@@ -514,10 +514,12 @@ func (az *Cloud) reconcileSecurityGroup(sg network.SecurityGroup, clusterName st
 		if err != nil {
 			return sg, false, err
 		}
+		k := 0
 		for j := range sourceAddressPrefixes {
+			k++
 			ix := i*len(sourceAddressPrefixes) + j
 			expectedSecurityRules[ix] = network.SecurityRule{
-				Name: to.StringPtr(securityRuleName),
+				Name: to.StringPtr(fmt.Sprintf("%s_%d", securityRuleName, k)),
 				SecurityRulePropertiesFormat: &network.SecurityRulePropertiesFormat{
 					Protocol:                 securityProto,
 					SourcePortRange:          to.StringPtr("*"),
