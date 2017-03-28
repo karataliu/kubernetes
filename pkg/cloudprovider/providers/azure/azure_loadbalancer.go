@@ -94,11 +94,22 @@ func (az *Cloud) getPublicIPName(clusterName string, service *v1.Service) (strin
 // EnsureLoadBalancer creates a new load balancer 'name', or updates the existing one. Returns the status of the balancer
 func (az *Cloud) EnsureLoadBalancer(clusterName string, service *v1.Service, nodes []*v1.Node) (*v1.LoadBalancerStatus, error) {
 	lbName := getLoadBalancerName(clusterName)
+	serviceName := getServiceName(service)
+
+	// Delete an IP address in case we created one.
+	if service.Spec.LoadBalancerIP != "" {
+		pipName := fmt.Sprintf("%s-%s", clusterName, cloudprovider.GetLoadBalancerName(service))
+		err := az.ensurePublicIPDeleted(serviceName, pipName)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	pipName, err := az.getPublicIPName(clusterName, service)
 	if err != nil {
 		return nil, err
 	}
-	serviceName := getServiceName(service)
+
 	glog.V(2).Infof("ensure(%s): START clusterName=%q lbName=%q", serviceName, clusterName, lbName)
 
 	pip, err := az.ensurePublicIPExists(serviceName, pipName)
@@ -348,10 +359,11 @@ func (az *Cloud) reconcileLoadBalancer(lb network.LoadBalancer, pip *network.Pub
 	// Ensure LoadBalancer's Frontend IP Configurations
 	dirtyConfigs := false
 	newConfigs := []network.FrontendIPConfiguration{}
-	if lb.FrontendIPConfigurations != nil {
-		newConfigs = *lb.FrontendIPConfigurations
-	}
+
 	if !wantLb {
+		if lb.FrontendIPConfigurations != nil {
+			newConfigs = *lb.FrontendIPConfigurations
+		}
 		for i := len(newConfigs) - 1; i >= 0; i-- {
 			config := newConfigs[i]
 			if strings.EqualFold(*config.Name, lbFrontendIPConfigName) {
@@ -361,22 +373,31 @@ func (az *Cloud) reconcileLoadBalancer(lb network.LoadBalancer, pip *network.Pub
 			}
 		}
 	} else {
+		fip := &network.FrontendIPConfigurationPropertiesFormat{
+			PublicIPAddress: &network.PublicIPAddress{
+				ID: pip.ID,
+			},
+		}
+
 		foundConfig := false
-		for _, config := range newConfigs {
-			if strings.EqualFold(*config.Name, lbFrontendIPConfigName) {
-				foundConfig = true
-				break
+		if lb.FrontendIPConfigurations != nil {
+			for _, config := range *lb.FrontendIPConfigurations {
+				if strings.EqualFold(*config.Name, lbFrontendIPConfigName) {
+					if fipConfigurationEquals(config.FrontendIPConfigurationPropertiesFormat, fip) {
+						newConfigs = append(newConfigs, config)
+						foundConfig = true
+					}
+				} else {
+					newConfigs = append(newConfigs, config)
+				}
 			}
 		}
+
 		if !foundConfig {
 			newConfigs = append(newConfigs,
 				network.FrontendIPConfiguration{
 					Name: to.StringPtr(lbFrontendIPConfigName),
-					FrontendIPConfigurationPropertiesFormat: &network.FrontendIPConfigurationPropertiesFormat{
-						PublicIPAddress: &network.PublicIPAddress{
-							ID: pip.ID,
-						},
-					},
+					FrontendIPConfigurationPropertiesFormat: fip,
 				})
 			glog.V(10).Infof("reconcile(%s)(%t): lb frontendconfig(%s) - adding", serviceName, wantLb, lbFrontendIPConfigName)
 			dirtyConfigs = true

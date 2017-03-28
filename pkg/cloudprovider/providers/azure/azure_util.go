@@ -244,3 +244,33 @@ func (az *Cloud) getIPForMachine(nodeName types.NodeName) (string, error) {
 	targetIP := *ipConfig.PrivateIPAddress
 	return targetIP, nil
 }
+
+func fipConfigurationEquals(a *network.FrontendIPConfigurationPropertiesFormat, b *network.FrontendIPConfigurationPropertiesFormat) bool {
+	if a.PublicIPAddress != nil {
+		if b.PublicIPAddress == nil {
+			return false
+		}
+
+		return strings.EqualFold(*a.PublicIPAddress.ID, *b.PublicIPAddress.ID)
+	}
+
+	if a.Subnet != nil {
+		if b.Subnet == nil {
+			return false
+		}
+
+		if !strings.EqualFold(*a.Subnet.ID, *b.Subnet.ID) {
+			return false
+		}
+
+		if a.PrivateIPAllocationMethod != b.PrivateIPAllocationMethod {
+			return false
+		}
+
+		if network.Static == a.PrivateIPAllocationMethod {
+			return strings.EqualFold(*a.PrivateIPAddress, *b.PrivateIPAddress)
+		}
+	}
+
+	return false
+}
