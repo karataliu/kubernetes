@@ -611,38 +611,20 @@ func findSecurityRule(rules []network.SecurityRule, rule network.SecurityRule) b
 // participating in the specified LoadBalancer Backend Pool.
 func (az *Cloud) ensureHostInPool(serviceName string, nodeName types.NodeName, backendPoolID string) error {
 	vmName := mapNodeNameToVMName(nodeName)
-	machine, err := az.VirtualMachinesClient.Get(az.ResourceGroup, vmName, "")
+	nic, err := az.getVirtualMachineNIC(vmName)
 	if err != nil {
 		return err
-	}
-
-	primaryNicID, err := getPrimaryInterfaceID(machine)
-	if err != nil {
-		return err
-	}
-	nicName, err := getLastSegment(primaryNicID)
-	if err != nil {
-		return err
-	}
-
-	// Check availability set
-	if az.PrimaryAvailabilitySetName != "" {
-		expectedAvailabilitySetName := az.getAvailabilitySetID(az.PrimaryAvailabilitySetName)
-		if !strings.EqualFold(*machine.AvailabilitySet.ID, expectedAvailabilitySetName) {
+	} else {
+		// Handle the case where the VM isn't a member of the Scale Set of Availability Set
+		if nic == nil {
 			glog.V(3).Infof(
 				"nicupdate(%s): skipping nic (%s) since it is not in the primaryAvailabilitSet(%s)",
-				serviceName, nicName, az.PrimaryAvailabilitySetName)
-			return nil
+				serviceName, *nic.Name, az.PrimaryAvailabilitySetName)
 		}
 	}
 
-	nic, err := az.InterfacesClient.Get(az.ResourceGroup, nicName, "")
-	if err != nil {
-		return err
-	}
-
 	var primaryIPConfig *network.InterfaceIPConfiguration
-	primaryIPConfig, err = getPrimaryIPConfig(nic)
+	primaryIPConfig, err = getPrimaryIPConfig(*nic)
 	if err != nil {
 		return err
 	}
@@ -666,11 +648,78 @@ func (az *Cloud) ensureHostInPool(serviceName string, nodeName types.NodeName, b
 
 		primaryIPConfig.LoadBalancerBackendAddressPools = &newBackendPools
 
-		glog.V(3).Infof("nicupdate(%s): nic(%s) - updating", serviceName, nicName)
-		_, err := az.InterfacesClient.CreateOrUpdate(az.ResourceGroup, *nic.Name, nic, nil)
+		glog.V(3).Infof("nicupdate(%s): nic(%s) - updating", serviceName, *nic.Name)
+		_, err := az.InterfacesClient.CreateOrUpdate(az.ResourceGroup, *nic.Name, *nic, nil)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (az *Cloud) getVirtualMachineNIC(vmName string) (*network.Interface, error) {
+	// Check availability set
+	if az.PrimaryAvailabilitySetName != "" {
+		machine, err := az.VirtualMachinesClient.Get(az.ResourceGroup, vmName, "")
+		if err != nil {
+			return nil, err
+		}
+
+		primaryNicID, err := getVMPrimaryInterfaceID(machine)
+		if err != nil {
+			return nil, err
+		}
+
+		nicName, err := getLastSegment(primaryNicID)
+		if err != nil {
+			return nil, err
+		}
+
+		expectedAvailabilitySetName := az.getAvailabilitySetID(az.PrimaryAvailabilitySetName)
+		if !strings.EqualFold(*machine.AvailabilitySet.ID, expectedAvailabilitySetName) {
+			return nil, nil
+		}
+
+		nic, err := az.InterfacesClient.Get(az.ResourceGroup, nicName, "")
+		if err != nil {
+			return nil, err
+		}
+
+		return &nic, nil
+
+	} else if az.PrimaryScaleSetName != "" {
+		machine, err := az.VirtualMachineScaleSetVMsClient.Get(az.ResourceGroup, az.Config.PrimaryScaleSetName, vmName)
+		if err != nil {
+			return nil, err
+		}
+
+		primaryNicID, err := getScaleSetVMPrimaryInterfaceID(machine)
+		if err != nil {
+			return nil, err
+		}
+
+		nicName, err := getLastSegment(primaryNicID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Not sure this can be done in the same way
+		// TODO: discuss with ColeM, I think I need to handle this case...
+		//expectedScaleSetName := az.getScaleSetID(az.PrimaryScaleSetName)
+		//if !strings.EqualFold(*machine.VirtualMachineScaleSetVMProperties.AvailabilitySet.ID, expectedAvailabilitySetName) {
+		//	glog.V(3).Infof(
+		//		"nicupdate(%s): skipping nic (%s) since it is not in the primaryAvailabilitSet(%s)",
+		//		serviceName, nicName, az.PrimaryAvailabilitySetName)
+		//	return nil
+		//}
+
+		nic, err := az.InterfacesClient.Get(az.ResourceGroup, nicName, "")
+		if err != nil {
+			return nil, err
+		}
+
+		return &nic, nil
+	}
+	return nil, fmt.Errorf("One of PrimaryScaleSetName or PrimaryAvailabilitySetName must be defined.")
+
 }
