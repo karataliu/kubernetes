@@ -334,6 +334,9 @@ type VolumeSource struct {
 	// ScaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.
 	// +optional
 	ScaleIO *ScaleIOVolumeSource `json:"scaleIO,omitempty" protobuf:"bytes,25,opt,name=scaleIO"`
+	// AzureKeyVault represents an object out of azure key vault (secret, key or certificate). The object will be serialized on the volume
+	//+optional
+	AzureKeyVault *AzureKeyVaultVolumeSource `json:"azureKeyVault,omitempty" protobuf:"bytes,27,opt,name=azureKeyVault"`
 }
 
 // PersistentVolumeClaimVolumeSource references the user's PVC in the same namespace.
@@ -1135,6 +1138,25 @@ type AzureDiskVolumeSource struct {
 	ReadOnly *bool `json:"readOnly,omitempty" protobuf:"varint,5,opt,name=readOnly"`
 	// Expected values Shared: mulitple blob disks per storage account  Dedicated: single blob disk per storage account  Managed: azure managed data disk (only in managed availability set). defaults to shared
 	Kind *AzureDataDiskKind `json:"kind,omitempty" protobuf:"bytes,6,opt,name=kind,casttype=AzureDataDiskKind"`
+}
+
+type AzureKeyVaultKind string
+
+const (
+	AzureKeyVaultKindSecret      AzureKeyVaultKind = "Secret"
+	AzureKeyVaultKindKey         AzureKeyVaultKind = "Key"
+	AzureKeyVaultKindCertificate AzureKeyVaultKind = "Certificate"
+)
+
+type AzureKeyVaultVolumeSource struct {
+	// Azure Key Vault Name
+	VaultName string `json:"vaultName" protobuf:"bytes,1,opt,name=vaultName"`
+	// Azure Key Vault Object Name
+	ObjectName string `json:"objectName" protobuf:"bytes,2,opt,name=objectName"`
+	// Azure Key Vault Object Kind (Secret, Certificate or Secret)
+	ObjectKind AzureKeyVaultKind `json:"objectKind" protobuf:"bytes,3,opt,name=objectKind,casttype=AzureKeyVaultKind"`
+	// Azure Key Vault Object Version. Empty string will default to current version
+	ObjectVersion string `json:"objectVersion,omitempty" protobuf:"bytes,4,opt,name=objectVersion"`
 }
 
 // PortworxVolumeSource represents a Portworx volume resource.

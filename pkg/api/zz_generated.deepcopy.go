@@ -44,6 +44,7 @@ func RegisterDeepCopies(scheme *runtime.Scheme) error {
 		conversion.GeneratedDeepCopyFunc{Fn: DeepCopy_api_AvoidPods, InType: reflect.TypeOf(&AvoidPods{})},
 		conversion.GeneratedDeepCopyFunc{Fn: DeepCopy_api_AzureDiskVolumeSource, InType: reflect.TypeOf(&AzureDiskVolumeSource{})},
 		conversion.GeneratedDeepCopyFunc{Fn: DeepCopy_api_AzureFileVolumeSource, InType: reflect.TypeOf(&AzureFileVolumeSource{})},
+		conversion.GeneratedDeepCopyFunc{Fn: DeepCopy_api_AzureKeyVaultVolumeSource, InType: reflect.TypeOf(&AzureKeyVaultVolumeSource{})},
 		conversion.GeneratedDeepCopyFunc{Fn: DeepCopy_api_Binding, InType: reflect.TypeOf(&Binding{})},
 		conversion.GeneratedDeepCopyFunc{Fn: DeepCopy_api_Capabilities, InType: reflect.TypeOf(&Capabilities{})},
 		conversion.GeneratedDeepCopyFunc{Fn: DeepCopy_api_CephFSVolumeSource, InType: reflect.TypeOf(&CephFSVolumeSource{})},
@@ -308,6 +309,15 @@ func DeepCopy_api_AzureFileVolumeSource(in interface{}, out interface{}, c *conv
 	{
 		in := in.(*AzureFileVolumeSource)
 		out := out.(*AzureFileVolumeSource)
+		*out = *in
+		return nil
+	}
+}
+
+func DeepCopy_api_AzureKeyVaultVolumeSource(in interface{}, out interface{}, c *conversion.Cloner) error {
+	{
+		in := in.(*AzureKeyVaultVolumeSource)
+		out := out.(*AzureKeyVaultVolumeSource)
 		*out = *in
 		return nil
 	}
@@ -3505,6 +3515,11 @@ func DeepCopy_api_VolumeSource(in interface{}, out interface{}, c *conversion.Cl
 			if err := DeepCopy_api_ScaleIOVolumeSource(*in, *out, c); err != nil {
 				return err
 			}
+		}
+		if in.AzureKeyVault != nil {
+			in, out := &in.AzureKeyVault, &out.AzureKeyVault
+			*out = new(AzureKeyVaultVolumeSource)
+			**out = **in
 		}
 		return nil
 	}

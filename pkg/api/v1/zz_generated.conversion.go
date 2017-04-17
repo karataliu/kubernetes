@@ -49,6 +49,8 @@ func RegisterConversions(scheme *runtime.Scheme) error {
 		Convert_api_AzureDiskVolumeSource_To_v1_AzureDiskVolumeSource,
 		Convert_v1_AzureFileVolumeSource_To_api_AzureFileVolumeSource,
 		Convert_api_AzureFileVolumeSource_To_v1_AzureFileVolumeSource,
+		Convert_v1_AzureKeyVaultVolumeSource_To_api_AzureKeyVaultVolumeSource,
+		Convert_api_AzureKeyVaultVolumeSource_To_v1_AzureKeyVaultVolumeSource,
 		Convert_v1_Binding_To_api_Binding,
 		Convert_api_Binding_To_v1_Binding,
 		Convert_v1_Capabilities_To_api_Capabilities,
@@ -506,6 +508,30 @@ func autoConvert_api_AzureFileVolumeSource_To_v1_AzureFileVolumeSource(in *api.A
 
 func Convert_api_AzureFileVolumeSource_To_v1_AzureFileVolumeSource(in *api.AzureFileVolumeSource, out *AzureFileVolumeSource, s conversion.Scope) error {
 	return autoConvert_api_AzureFileVolumeSource_To_v1_AzureFileVolumeSource(in, out, s)
+}
+
+func autoConvert_v1_AzureKeyVaultVolumeSource_To_api_AzureKeyVaultVolumeSource(in *AzureKeyVaultVolumeSource, out *api.AzureKeyVaultVolumeSource, s conversion.Scope) error {
+	out.VaultName = in.VaultName
+	out.ObjectName = in.ObjectName
+	out.ObjectKind = api.AzureKeyVaultKind(in.ObjectKind)
+	out.ObjectVersion = in.ObjectVersion
+	return nil
+}
+
+func Convert_v1_AzureKeyVaultVolumeSource_To_api_AzureKeyVaultVolumeSource(in *AzureKeyVaultVolumeSource, out *api.AzureKeyVaultVolumeSource, s conversion.Scope) error {
+	return autoConvert_v1_AzureKeyVaultVolumeSource_To_api_AzureKeyVaultVolumeSource(in, out, s)
+}
+
+func autoConvert_api_AzureKeyVaultVolumeSource_To_v1_AzureKeyVaultVolumeSource(in *api.AzureKeyVaultVolumeSource, out *AzureKeyVaultVolumeSource, s conversion.Scope) error {
+	out.VaultName = in.VaultName
+	out.ObjectName = in.ObjectName
+	out.ObjectKind = AzureKeyVaultKind(in.ObjectKind)
+	out.ObjectVersion = in.ObjectVersion
+	return nil
+}
+
+func Convert_api_AzureKeyVaultVolumeSource_To_v1_AzureKeyVaultVolumeSource(in *api.AzureKeyVaultVolumeSource, out *AzureKeyVaultVolumeSource, s conversion.Scope) error {
+	return autoConvert_api_AzureKeyVaultVolumeSource_To_v1_AzureKeyVaultVolumeSource(in, out, s)
 }
 
 func autoConvert_v1_Binding_To_api_Binding(in *Binding, out *api.Binding, s conversion.Scope) error {
@@ -4620,6 +4646,7 @@ func autoConvert_v1_VolumeSource_To_api_VolumeSource(in *VolumeSource, out *api.
 	out.Projected = (*api.ProjectedVolumeSource)(unsafe.Pointer(in.Projected))
 	out.PortworxVolume = (*api.PortworxVolumeSource)(unsafe.Pointer(in.PortworxVolume))
 	out.ScaleIO = (*api.ScaleIOVolumeSource)(unsafe.Pointer(in.ScaleIO))
+	out.AzureKeyVault = (*api.AzureKeyVaultVolumeSource)(unsafe.Pointer(in.AzureKeyVault))
 	return nil
 }
 
@@ -4654,6 +4681,7 @@ func autoConvert_api_VolumeSource_To_v1_VolumeSource(in *api.VolumeSource, out *
 	out.Projected = (*ProjectedVolumeSource)(unsafe.Pointer(in.Projected))
 	out.PortworxVolume = (*PortworxVolumeSource)(unsafe.Pointer(in.PortworxVolume))
 	out.ScaleIO = (*ScaleIOVolumeSource)(unsafe.Pointer(in.ScaleIO))
+	out.AzureKeyVault = (*AzureKeyVaultVolumeSource)(unsafe.Pointer(in.AzureKeyVault))
 	return nil
 }
 
