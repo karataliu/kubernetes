@@ -49,6 +49,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/kubernetes/pkg/api/v1"
@@ -727,6 +729,71 @@ var _ = framework.KubeDescribe("Volumes [Volume]", func() {
 					// Randomize index.html to make sure we don't see the
 					// content from previous test runs.
 					ExpectedContent: "Hello from Azure from namespace " + volumeName,
+				},
+			}
+
+			framework.InjectHtml(cs, config, tests[0].Volume, tests[0].ExpectedContent)
+
+			fsGroup := int64(1234)
+			framework.TestVolumeClient(cs, config, &fsGroup, tests)
+		})
+	})
+
+	////////////////////////////////////////////////////////////////////////
+	// PersistentVolumeClaim
+	////////////////////////////////////////////////////////////////////////
+	// Testing dynamic provisioning
+	// Should run in an environment where default storage class is available.
+	framework.KubeDescribe("PersistentVolumeClaim", func() {
+		It("should be mountable when created by default storage class [Slow]", func() {
+			framework.SkipUnlessProviderIs("azure")
+			config := framework.VolumeTestConfig{
+				Namespace: namespace.Name,
+				Prefix:    "volumes-pvc-test",
+			}
+			defer func() {
+				if clean {
+					framework.Logf("Running volumeTestCleanup")
+					framework.VolumeTestCleanup(f, config)
+				}
+			}()
+
+			claimRequest := v1.PersistentVolumeClaim{
+				ObjectMeta: metav1.ObjectMeta{
+					GenerateName: "volumes-pvc-test-",
+					Namespace:    namespace.Name,
+				},
+				Spec: v1.PersistentVolumeClaimSpec{
+					AccessModes: []v1.PersistentVolumeAccessMode{
+						v1.ReadWriteOnce,
+					},
+					Resources: v1.ResourceRequirements{
+						Requests: v1.ResourceList{
+							v1.ResourceName(v1.ResourceStorage): resource.MustParse("1Gi"),
+						},
+					},
+				},
+			}
+
+			claim, err := cs.CoreV1().PersistentVolumeClaims(namespace.Name).Create(&claimRequest)
+			Expect(err).NotTo(HaveOccurred())
+			defer func() {
+				if clean {
+					framework.ExpectNoError(framework.DeletePersistentVolumeClaim(cs, claim.Name, namespace.Name))
+				}
+			}()
+
+			readOnly := false
+			tests := []framework.VolumeTest{
+				{
+					Volume: v1.VolumeSource{
+						PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
+							ClaimName: claim.Name,
+							ReadOnly:  readOnly,
+						},
+					},
+					File:            "index.html",
+					ExpectedContent: "Hello, my claim is " + claim.Namespace + "/" + claim.Name + ".",
 				},
 			}
 
