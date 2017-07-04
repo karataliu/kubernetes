@@ -677,6 +677,7 @@ items:
     resources:
     - secrets
     verbs:
+    - create
     - get
   - apiGroups:
     - ""

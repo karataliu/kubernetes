@@ -188,7 +188,7 @@ func init() {
 			// glusterfs
 			rbac.NewRule("get", "list", "watch").Groups(storageGroup).Resources("storageclasses").RuleOrDie(),
 			rbac.NewRule("get", "create", "delete").Groups(legacyGroup).Resources("services", "endpoints").RuleOrDie(),
-			rbac.NewRule("get").Groups(legacyGroup).Resources("secrets").RuleOrDie(),
+			rbac.NewRule("get", "create").Groups(legacyGroup).Resources("secrets").RuleOrDie(),
 			// openstack
 			rbac.NewRule("get", "list").Groups(legacyGroup).Resources("nodes").RuleOrDie(),
 
