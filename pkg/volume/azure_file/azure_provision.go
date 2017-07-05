@@ -164,11 +164,6 @@ func (a *azureFileProvisioner) Provision() (*v1.PersistentVolume, error) {
 	if err != nil {
 		return nil, err
 	}
-	// create a secret for storage account and key
-	secretName, err := a.util.SetAzureCredentials(a.plugin.host, a.options.PVC.Namespace, account, key)
-	if err != nil {
-		return nil, err
-	}
 	// create PV
 	pv := &v1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
@@ -185,9 +180,11 @@ func (a *azureFileProvisioner) Provision() (*v1.PersistentVolume, error) {
 				v1.ResourceName(v1.ResourceStorage): resource.MustParse(fmt.Sprintf("%dGi", requestGB)),
 			},
 			PersistentVolumeSource: v1.PersistentVolumeSource{
-				AzureFile: &v1.AzureFileVolumeSource{
-					SecretName: secretName,
-					ShareName:  name,
+				AzureFile: &v1.AzureFilePersistentVolumeSource{
+					SecretName:  "nonexistence",
+					ShareName:   name,
+					AccountName: account,
+					AccountKey:  key,
 				},
 			},
 		},

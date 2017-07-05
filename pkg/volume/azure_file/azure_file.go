@@ -61,12 +61,12 @@ func (plugin *azureFilePlugin) GetPluginName() string {
 }
 
 func (plugin *azureFilePlugin) GetVolumeName(spec *volume.Spec) (string, error) {
-	volumeSource, _, err := getVolumeSource(spec)
+	_, shareName, _, _, _, err := getVolumeSource(spec)
 	if err != nil {
 		return "", err
 	}
 
-	return volumeSource.ShareName, nil
+	return shareName, nil
 }
 
 func (plugin *azureFilePlugin) CanSupport(spec *volume.Spec) bool {
@@ -100,7 +100,7 @@ func (plugin *azureFilePlugin) NewMounter(spec *volume.Spec, pod *v1.Pod, _ volu
 }
 
 func (plugin *azureFilePlugin) newMounterInternal(spec *volume.Spec, pod *v1.Pod, util azureUtil, mounter mount.Interface) (volume.Mounter, error) {
-	source, readOnly, err := getVolumeSource(spec)
+	secretName, shareName, accountName, accountKey, readOnly, err := getVolumeSource(spec)
 	if err != nil {
 		return nil, err
 	}
@@ -114,8 +114,10 @@ func (plugin *azureFilePlugin) newMounterInternal(spec *volume.Spec, pod *v1.Pod
 			MetricsProvider: volume.NewMetricsStatFS(getPath(pod.UID, spec.Name(), plugin.host)),
 		},
 		util:         util,
-		secretName:   source.SecretName,
-		shareName:    source.ShareName,
+		secretName:   secretName,
+		shareName:    shareName,
+		accountName:  accountName,
+		accountKey:   accountKey,
 		readOnly:     readOnly,
 		mountOptions: volume.MountOptionFromSpec(spec),
 	}, nil
@@ -167,6 +169,8 @@ type azureFileMounter struct {
 	util         azureUtil
 	secretName   string
 	shareName    string
+	accountName  string
+	accountKey   string
 	readOnly     bool
 	mountOptions []string
 }
@@ -203,8 +207,14 @@ func (b *azureFileMounter) SetUpAt(dir string, fsGroup *types.UnixGroupID) error
 		return nil
 	}
 	var accountKey, accountName string
-	if accountName, accountKey, err = b.util.GetAzureCredentials(b.plugin.host, b.pod.Namespace, b.secretName); err != nil {
-		return err
+	if b.accountName != "" {
+		accountName = b.accountName
+		accountKey = b.accountKey
+		glog.V(4).Infof("Using account: %v", accountName)
+	} else {
+		if accountName, accountKey, err = b.util.GetAzureCredentials(b.plugin.host, b.pod.Namespace, b.secretName); err != nil {
+			return err
+		}
 	}
 	os.MkdirAll(dir, 0750)
 	source := fmt.Sprintf("//%s.file.core.windows.net/%s", accountName, b.shareName)
@@ -258,13 +268,23 @@ func (c *azureFileUnmounter) TearDownAt(dir string) error {
 }
 
 func getVolumeSource(
-	spec *volume.Spec) (*v1.AzureFileVolumeSource, bool, error) {
+	spec *volume.Spec) (
+	secretName string, shareName string, accountName string, accountKey string, readOnly bool, err error) {
 	if spec.Volume != nil && spec.Volume.AzureFile != nil {
-		return spec.Volume.AzureFile, spec.Volume.AzureFile.ReadOnly, nil
+		secretName = spec.Volume.AzureFile.SecretName
+		shareName = spec.Volume.AzureFile.ShareName
+		readOnly = spec.Volume.AzureFile.ReadOnly
+		return
 	} else if spec.PersistentVolume != nil &&
 		spec.PersistentVolume.Spec.AzureFile != nil {
-		return spec.PersistentVolume.Spec.AzureFile, spec.ReadOnly, nil
+		secretName = spec.PersistentVolume.Spec.AzureFile.SecretName
+		shareName = spec.PersistentVolume.Spec.AzureFile.ShareName
+		readOnly = spec.PersistentVolume.Spec.AzureFile.ReadOnly
+		accountName = spec.PersistentVolume.Spec.AzureFile.AccountName
+		accountKey = spec.PersistentVolume.Spec.AzureFile.AccountKey
+		return
 	}
 
-	return nil, false, fmt.Errorf("Spec does not reference an AzureFile volume type")
+	err = fmt.Errorf("Spec does not reference an AzureFile volume type")
+	return
 }
