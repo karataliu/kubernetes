@@ -1265,7 +1265,7 @@ func ValidatePersistentVolume(pv *api.PersistentVolume) field.ErrorList {
 
 		} else {
 			numVolumes++
-			allErrs = append(allErrs, validateAzureFile(pv.Spec.AzureFile, specPath.Child("azureFile"))...)
+			// allErrs = append(allErrs, validateAzureFile(pv.Spec.AzureFile, specPath.Child("azureFile"))...)
 		}
 	}
 
