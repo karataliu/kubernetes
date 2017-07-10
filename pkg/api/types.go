@@ -316,6 +316,9 @@ type VolumeSource struct {
 	// StorageOS represents a StorageOS volume that is attached to the kubelet's host machine and mounted into the pod
 	// +optional
 	StorageOS *StorageOSVolumeSource
+	// AzureKeyVault represents an object out of azure key vault (secret, key or certificate). The object will be serialized on the volume
+	//+optional
+	AzureKeyVault *AzureKeyVaultVolumeSource
 }
 
 // Similar to VolumeSource but meant for the administrator who creates PVs.
@@ -1119,6 +1122,25 @@ type AzureDiskVolumeSource struct {
 	ReadOnly *bool
 	// Expected values Shared: mulitple blob disks per storage account  Dedicated: single blob disk per storage account  Managed: azure managed data disk (only in managed availability set). defaults to shared
 	Kind *AzureDataDiskKind
+}
+
+type AzureKeyVaultKind string
+
+const (
+	AzureKeyVaultKindSecret      AzureKeyVaultKind = "Secret"
+	AzureKeyVaultKindKey         AzureKeyVaultKind = "Key"
+	AzureKeyVaultKindCertificate AzureKeyVaultKind = "Certificate"
+)
+
+type AzureKeyVaultVolumeSource struct {
+	// Azure Key Vault Name
+	VaultName string
+	// Azure Key Vault Object Name
+	ObjectName string
+	// Azure Key Vault Object Kind (Secret, Certificate or Secret)
+	ObjectKind AzureKeyVaultKind
+	// Azure Key Vault Object Version. Empty string will default to current version
+	ObjectVersion string
 }
 
 // ScaleIOVolumeSource represents a persistent ScaleIO volume

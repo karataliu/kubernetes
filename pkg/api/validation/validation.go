@@ -599,7 +599,10 @@ func validateVolumeSource(source *api.VolumeSource, fldPath *field.Path) field.E
 			allErrs = append(allErrs, validateScaleIOVolumeSource(source.ScaleIO, fldPath.Child("scaleIO"))...)
 		}
 	}
-
+	if source.AzureKeyVault != nil {
+		numVolumes++
+		allErrs = append(allErrs, validateAzureKeyVault(source.AzureKeyVault, fldPath.Child("azureKeyVault"))...)
+	}
 	if numVolumes == 0 {
 		allErrs = append(allErrs, field.Required(fldPath, "must specify a volume type"))
 	}
@@ -1110,6 +1113,23 @@ func validateScaleIOVolumeSource(sio *api.ScaleIOVolumeSource, fldPath *field.Pa
 	}
 	if sio.VolumeName == "" {
 		allErrs = append(allErrs, field.Required(fldPath.Child("volumeName"), ""))
+	}
+	return allErrs
+}
+func validateAzureKeyVault(azure *api.AzureKeyVaultVolumeSource, fldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if azure.VaultName == "" {
+		allErrs = append(allErrs, field.Required(fldPath.Child("vaultName"), ""))
+	}
+	if azure.ObjectName == "" {
+		allErrs = append(allErrs, field.Required(fldPath.Child("objectName"), ""))
+	}
+
+	var supportedObjectKinds = sets.NewString(string(api.AzureKeyVaultKindSecret), string(api.AzureKeyVaultKindKey), string(api.AzureKeyVaultKindCertificate))
+
+	// validate that DiskUri is the correct format
+	if azure.ObjectKind == "" && !supportedObjectKinds.Has(string(azure.ObjectKind)) {
+		allErrs = append(allErrs, field.NotSupported(fldPath.Child("objectKind"), azure.ObjectKind, supportedObjectKinds.List()))
 	}
 	return allErrs
 }

@@ -351,6 +351,28 @@ type VolumeSource struct {
 	// StorageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.
 	// +optional
 	StorageOS *StorageOSVolumeSource `json:"storageos,omitempty" protobuf:"bytes,27,opt,name=storageos"`
+	// AzureKeyVault represents an object out of azure key vault (secret, key or certificate). The object will be serialized on the volume
+	// +optional
+	AzureKeyVault *AzureKeyVaultVolumeSource `json:"azureKeyVault,omitempty" protobuf:"bytes,28,opt,name=azureKeyVault"`
+}
+
+type AzureKeyVaultKind string
+
+const (
+	AzureKeyVaultKindSecret      AzureKeyVaultKind = "Secret"
+	AzureKeyVaultKindKey         AzureKeyVaultKind = "Key"
+	AzureKeyVaultKindCertificate AzureKeyVaultKind = "Certificate"
+)
+
+type AzureKeyVaultVolumeSource struct {
+	// Azure Key Vault Name
+	VaultName string `json:"vaultName" protobuf:"bytes,1,name=vaultName"`
+	// Azure Key Vault Object Name
+	ObjectName string `json:"objectName" protobuf:"bytes,2,name=objectName"`
+	// Azure Key Vault Object Kind (Secret, Certificate or Secret)
+	ObjectKind AzureKeyVaultKind `json:"objectKind" protobuf:"bytes,3,name=objectKind"`
+	// Azure Key Vault Object Version. Empty string will default to current version
+	ObjectVersion string `json:"objectVersion" protobuf:"bytes,4,name=objectVersion"`
 }
 
 // PersistentVolumeClaimVolumeSource references the user's PVC in the same namespace.

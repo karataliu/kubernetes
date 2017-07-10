@@ -94,6 +94,17 @@ func (AzureFileVolumeSource) SwaggerDoc() map[string]string {
 	return map_AzureFileVolumeSource
 }
 
+var map_AzureKeyVaultVolumeSource = map[string]string{
+	"vaultName":     "Azure Key Vault Name",
+	"objectName":    "Azure Key Vault Object Name",
+	"objectKind":    "Azure Key Vault Object Kind (Secret, Certificate or Secret)",
+	"objectVersion": "Azure Key Vault Object Version. Empty string will default to current version",
+}
+
+func (AzureKeyVaultVolumeSource) SwaggerDoc() map[string]string {
+	return map_AzureKeyVaultVolumeSource
+}
+
 var map_Binding = map[string]string{
 	"":         "Binding ties one object to another; for example, a pod is bound to a node by a scheduler. Deprecated in 1.7, please use the bindings subresource of pods instead.",
 	"metadata": "Standard object's metadata. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata",
@@ -2010,6 +2021,7 @@ var map_VolumeSource = map[string]string{
 	"portworxVolume":       "PortworxVolume represents a portworx volume attached and mounted on kubelets host machine",
 	"scaleIO":              "ScaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.",
 	"storageos":            "StorageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.",
+	"azureKeyVault":        "AzureKeyVault represents an object out of azure key vault (secret, key or certificate). The object will be serialized on the volume",
 }
 
 func (VolumeSource) SwaggerDoc() map[string]string {
