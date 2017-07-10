@@ -138,6 +138,20 @@ message AzureFileVolumeSource {
   optional bool readOnly = 3;
 }
 
+message AzureKeyVaultVolumeSource {
+  // Azure Key Vault Name
+  optional string vaultName = 1;
+
+  // Azure Key Vault Object Name
+  optional string objectName = 2;
+
+  // Azure Key Vault Object Kind (Secret, Certificate or Secret)
+  optional string objectKind = 3;
+
+  // Azure Key Vault Object Version. Empty string will default to current version
+  optional string objectVersion = 4;
+}
+
 // Binding ties one object to another; for example, a pod is bound to a node by a scheduler.
 // Deprecated in 1.7, please use the bindings subresource of pods instead.
 message Binding {
@@ -4099,6 +4113,10 @@ message VolumeSource {
   // StorageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.
   // +optional
   optional StorageOSVolumeSource storageos = 27;
+
+  // AzureKeyVault represents an object out of azure key vault (secret, key or certificate). The object will be serialized on the volume
+  // +optional
+  optional AzureKeyVaultVolumeSource azureKeyVault = 28;
 }
 
 // Represents a vSphere volume resource.

@@ -5279,6 +5279,32 @@ func (x *VolumeSource) codecDecodeSelfFromArray(l int, d *codec1978.Decoder) {
 	z.DecSendContainerState(codecSelfer_containerArrayEnd1234)
 }
 
+func (x AzureKeyVaultKind) CodecEncodeSelf(e *codec1978.Encoder) {
+	var h codecSelfer1234
+	z, r := codec1978.GenHelperEncoder(e)
+	_, _, _ = h, z, r
+	yym1 := z.EncBinary()
+	_ = yym1
+	if false {
+	} else if z.HasExtensions() && z.EncExt(x) {
+	} else {
+		r.EncodeString(codecSelferC_UTF81234, string(x))
+	}
+}
+
+func (x *AzureKeyVaultKind) CodecDecodeSelf(d *codec1978.Decoder) {
+	var h codecSelfer1234
+	z, r := codec1978.GenHelperDecoder(d)
+	_, _, _ = h, z, r
+	yym1 := z.DecBinary()
+	_ = yym1
+	if false {
+	} else if z.HasExtensions() && z.DecExt(x) {
+	} else {
+		*((*string)(x)) = r.DecodeString()
+	}
+}
+
 func (x *AzureKeyVaultVolumeSource) CodecEncodeSelf(e *codec1978.Encoder) {
 	var h codecSelfer1234
 	z, r := codec1978.GenHelperEncoder(e)
@@ -5349,22 +5375,12 @@ func (x *AzureKeyVaultVolumeSource) CodecEncodeSelf(e *codec1978.Encoder) {
 			}
 			if yyr2 || yy2arr2 {
 				z.EncSendContainerState(codecSelfer_containerArrayElem1234)
-				yym10 := z.EncBinary()
-				_ = yym10
-				if false {
-				} else {
-					r.EncodeString(codecSelferC_UTF81234, string(x.ObjectKind))
-				}
+				x.ObjectKind.CodecEncodeSelf(e)
 			} else {
 				z.EncSendContainerState(codecSelfer_containerMapKey1234)
 				r.EncodeString(codecSelferC_UTF81234, string("objectKind"))
 				z.EncSendContainerState(codecSelfer_containerMapValue1234)
-				yym11 := z.EncBinary()
-				_ = yym11
-				if false {
-				} else {
-					r.EncodeString(codecSelferC_UTF81234, string(x.ObjectKind))
-				}
+				x.ObjectKind.CodecEncodeSelf(e)
 			}
 			if yyr2 || yy2arr2 {
 				z.EncSendContainerState(codecSelfer_containerArrayElem1234)
@@ -5475,23 +5491,18 @@ func (x *AzureKeyVaultVolumeSource) codecDecodeSelfFromMap(l int, d *codec1978.D
 				x.ObjectKind = ""
 			} else {
 				yyv8 := &x.ObjectKind
-				yym9 := z.DecBinary()
-				_ = yym9
-				if false {
-				} else {
-					*((*string)(yyv8)) = r.DecodeString()
-				}
+				yyv8.CodecDecodeSelf(d)
 			}
 		case "objectVersion":
 			if r.TryDecodeAsNil() {
 				x.ObjectVersion = ""
 			} else {
-				yyv10 := &x.ObjectVersion
-				yym11 := z.DecBinary()
-				_ = yym11
+				yyv9 := &x.ObjectVersion
+				yym10 := z.DecBinary()
+				_ = yym10
 				if false {
 				} else {
-					*((*string)(yyv10)) = r.DecodeString()
+					*((*string)(yyv9)) = r.DecodeString()
 				}
 			}
 		default:
@@ -5505,16 +5516,16 @@ func (x *AzureKeyVaultVolumeSource) codecDecodeSelfFromArray(l int, d *codec1978
 	var h codecSelfer1234
 	z, r := codec1978.GenHelperDecoder(d)
 	_, _, _ = h, z, r
-	var yyj12 int
-	var yyb12 bool
-	var yyhl12 bool = l >= 0
-	yyj12++
-	if yyhl12 {
-		yyb12 = yyj12 > l
+	var yyj11 int
+	var yyb11 bool
+	var yyhl11 bool = l >= 0
+	yyj11++
+	if yyhl11 {
+		yyb11 = yyj11 > l
 	} else {
-		yyb12 = r.CheckBreak()
+		yyb11 = r.CheckBreak()
 	}
-	if yyb12 {
+	if yyb11 {
 		z.DecSendContainerState(codecSelfer_containerArrayEnd1234)
 		return
 	}
@@ -5522,21 +5533,21 @@ func (x *AzureKeyVaultVolumeSource) codecDecodeSelfFromArray(l int, d *codec1978
 	if r.TryDecodeAsNil() {
 		x.VaultName = ""
 	} else {
-		yyv13 := &x.VaultName
-		yym14 := z.DecBinary()
-		_ = yym14
+		yyv12 := &x.VaultName
+		yym13 := z.DecBinary()
+		_ = yym13
 		if false {
 		} else {
-			*((*string)(yyv13)) = r.DecodeString()
+			*((*string)(yyv12)) = r.DecodeString()
 		}
 	}
-	yyj12++
-	if yyhl12 {
-		yyb12 = yyj12 > l
+	yyj11++
+	if yyhl11 {
+		yyb11 = yyj11 > l
 	} else {
-		yyb12 = r.CheckBreak()
+		yyb11 = r.CheckBreak()
 	}
-	if yyb12 {
+	if yyb11 {
 		z.DecSendContainerState(codecSelfer_containerArrayEnd1234)
 		return
 	}
@@ -5544,21 +5555,21 @@ func (x *AzureKeyVaultVolumeSource) codecDecodeSelfFromArray(l int, d *codec1978
 	if r.TryDecodeAsNil() {
 		x.ObjectName = ""
 	} else {
-		yyv15 := &x.ObjectName
-		yym16 := z.DecBinary()
-		_ = yym16
+		yyv14 := &x.ObjectName
+		yym15 := z.DecBinary()
+		_ = yym15
 		if false {
 		} else {
-			*((*string)(yyv15)) = r.DecodeString()
+			*((*string)(yyv14)) = r.DecodeString()
 		}
 	}
-	yyj12++
-	if yyhl12 {
-		yyb12 = yyj12 > l
+	yyj11++
+	if yyhl11 {
+		yyb11 = yyj11 > l
 	} else {
-		yyb12 = r.CheckBreak()
+		yyb11 = r.CheckBreak()
 	}
-	if yyb12 {
+	if yyb11 {
 		z.DecSendContainerState(codecSelfer_containerArrayEnd1234)
 		return
 	}
@@ -5566,21 +5577,16 @@ func (x *AzureKeyVaultVolumeSource) codecDecodeSelfFromArray(l int, d *codec1978
 	if r.TryDecodeAsNil() {
 		x.ObjectKind = ""
 	} else {
-		yyv17 := &x.ObjectKind
-		yym18 := z.DecBinary()
-		_ = yym18
-		if false {
-		} else {
-			*((*string)(yyv17)) = r.DecodeString()
-		}
+		yyv16 := &x.ObjectKind
+		yyv16.CodecDecodeSelf(d)
 	}
-	yyj12++
-	if yyhl12 {
-		yyb12 = yyj12 > l
+	yyj11++
+	if yyhl11 {
+		yyb11 = yyj11 > l
 	} else {
-		yyb12 = r.CheckBreak()
+		yyb11 = r.CheckBreak()
 	}
-	if yyb12 {
+	if yyb11 {
 		z.DecSendContainerState(codecSelfer_containerArrayEnd1234)
 		return
 	}
@@ -5588,26 +5594,26 @@ func (x *AzureKeyVaultVolumeSource) codecDecodeSelfFromArray(l int, d *codec1978
 	if r.TryDecodeAsNil() {
 		x.ObjectVersion = ""
 	} else {
-		yyv19 := &x.ObjectVersion
-		yym20 := z.DecBinary()
-		_ = yym20
+		yyv17 := &x.ObjectVersion
+		yym18 := z.DecBinary()
+		_ = yym18
 		if false {
 		} else {
-			*((*string)(yyv19)) = r.DecodeString()
+			*((*string)(yyv17)) = r.DecodeString()
 		}
 	}
 	for {
-		yyj12++
-		if yyhl12 {
-			yyb12 = yyj12 > l
+		yyj11++
+		if yyhl11 {
+			yyb11 = yyj11 > l
 		} else {
-			yyb12 = r.CheckBreak()
+			yyb11 = r.CheckBreak()
 		}
-		if yyb12 {
+		if yyb11 {
 			break
 		}
 		z.DecSendContainerState(codecSelfer_containerArrayElem1234)
-		z.DecStructFieldNotFound(yyj12-1, "")
+		z.DecStructFieldNotFound(yyj11-1, "")
 	}
 	z.DecSendContainerState(codecSelfer_containerArrayEnd1234)
 }

@@ -3958,6 +3958,10 @@
      "storageos": {
       "$ref": "v1.StorageOSVolumeSource",
       "description": "StorageOS represents a StorageOS volume attached and mounted on Kubernetes nodes."
+     },
+     "azureKeyVault": {
+      "$ref": "v1.AzureKeyVaultVolumeSource",
+      "description": "AzureKeyVault represents an object out of azure key vault (secret, key or certificate). The object will be serialized on the volume"
      }
     }
    },
@@ -4844,6 +4848,33 @@
      "secretRef": {
       "$ref": "v1.LocalObjectReference",
       "description": "SecretRef specifies the secret to use for obtaining the StorageOS API credentials.  If not specified, default values will be attempted."
+     }
+    }
+   },
+   "v1.AzureKeyVaultVolumeSource": {
+    "id": "v1.AzureKeyVaultVolumeSource",
+    "required": [
+     "vaultName",
+     "objectName",
+     "objectKind",
+     "objectVersion"
+    ],
+    "properties": {
+     "vaultName": {
+      "type": "string",
+      "description": "Azure Key Vault Name"
+     },
+     "objectName": {
+      "type": "string",
+      "description": "Azure Key Vault Object Name"
+     },
+     "objectKind": {
+      "type": "string",
+      "description": "Azure Key Vault Object Kind (Secret, Certificate or Secret)"
+     },
+     "objectVersion": {
+      "type": "string",
+      "description": "Azure Key Vault Object Version. Empty string will default to current version"
      }
     }
    },

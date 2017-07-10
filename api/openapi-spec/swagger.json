@@ -48645,6 +48645,32 @@
      }
     }
    },
+   "io.k8s.api.core.v1.AzureKeyVaultVolumeSource": {
+    "required": [
+     "vaultName",
+     "objectName",
+     "objectKind",
+     "objectVersion"
+    ],
+    "properties": {
+     "objectKind": {
+      "description": "Azure Key Vault Object Kind (Secret, Certificate or Secret)",
+      "type": "string"
+     },
+     "objectName": {
+      "description": "Azure Key Vault Object Name",
+      "type": "string"
+     },
+     "objectVersion": {
+      "description": "Azure Key Vault Object Version. Empty string will default to current version",
+      "type": "string"
+     },
+     "vaultName": {
+      "description": "Azure Key Vault Name",
+      "type": "string"
+     }
+    }
+   },
    "io.k8s.api.core.v1.Binding": {
     "description": "Binding ties one object to another; for example, a pod is bound to a node by a scheduler. Deprecated in 1.7, please use the bindings subresource of pods instead.",
     "required": [
@@ -52592,6 +52618,10 @@
      "azureFile": {
       "description": "AzureFile represents an Azure File Service mount on the host and bind mount to the pod.",
       "$ref": "#/definitions/io.k8s.api.core.v1.AzureFileVolumeSource"
+     },
+     "azureKeyVault": {
+      "description": "AzureKeyVault represents an object out of azure key vault (secret, key or certificate). The object will be serialized on the volume",
+      "$ref": "#/definitions/io.k8s.api.core.v1.AzureKeyVaultVolumeSource"
      },
      "cephfs": {
       "description": "CephFS represents a Ceph FS mount on the host that shares a pod's lifetime",
