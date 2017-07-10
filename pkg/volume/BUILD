@@ -93,6 +93,7 @@ filegroup(
         "//pkg/volume/aws_ebs:all-srcs",
         "//pkg/volume/azure_dd:all-srcs",
         "//pkg/volume/azure_file:all-srcs",
+        "//pkg/volume/azure_keyvault:all-srcs",
         "//pkg/volume/cephfs:all-srcs",
         "//pkg/volume/cinder:all-srcs",
         "//pkg/volume/configmap:all-srcs",

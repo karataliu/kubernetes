@@ -21,6 +21,7 @@ filegroup(
         "//vendor/github.com/Azure/azure-sdk-for-go/arm/containerregistry:all-srcs",
         "//vendor/github.com/Azure/azure-sdk-for-go/arm/network:all-srcs",
         "//vendor/github.com/Azure/azure-sdk-for-go/arm/storage:all-srcs",
+        "//vendor/github.com/Azure/azure-sdk-for-go/dataplane/keyvault:all-srcs",
         "//vendor/github.com/Azure/azure-sdk-for-go/storage:all-srcs",
         "//vendor/github.com/Azure/go-ansiterm:all-srcs",
         "//vendor/github.com/Azure/go-autorest/autorest:all-srcs",
