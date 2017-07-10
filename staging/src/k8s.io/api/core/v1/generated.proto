@@ -149,6 +149,7 @@ message AzureKeyVaultVolumeSource {
   optional string objectKind = 3;
 
   // Azure Key Vault Object Version. Empty string will default to current version
+  // +optional
   optional string objectVersion = 4;
 }
 
