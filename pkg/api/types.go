@@ -317,7 +317,7 @@ type VolumeSource struct {
 	// +optional
 	StorageOS *StorageOSVolumeSource
 	// AzureKeyVault represents an object out of azure key vault (secret, key or certificate). The object will be serialized on the volume
-	//+optional
+	// +optional
 	AzureKeyVault *AzureKeyVaultVolumeSource
 }
 
@@ -1140,6 +1140,7 @@ type AzureKeyVaultVolumeSource struct {
 	// Azure Key Vault Object Kind (Secret, Certificate or Secret)
 	ObjectKind AzureKeyVaultKind
 	// Azure Key Vault Object Version. Empty string will default to current version
+	// +optional
 	ObjectVersion string
 }
 
