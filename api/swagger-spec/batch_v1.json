@@ -2603,8 +2603,7 @@
     "required": [
      "vaultName",
      "objectName",
-     "objectKind",
-     "objectVersion"
+     "objectKind"
     ],
     "properties": {
      "vaultName": {

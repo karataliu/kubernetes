@@ -373,7 +373,7 @@ type AzureKeyVaultVolumeSource struct {
 	ObjectKind AzureKeyVaultKind `json:"objectKind" protobuf:"bytes,3,name=objectKind"`
 	// Azure Key Vault Object Version. Empty string will default to current version
 	// +optional
-	ObjectVersion string `json:"objectVersion" protobuf:"bytes,4,opt,name=objectVersion"`
+	ObjectVersion string `json:"objectVersion,omitempty" protobuf:"bytes,4,opt,name=objectVersion"`
 }
 
 // PersistentVolumeClaimVolumeSource references the user's PVC in the same namespace.
