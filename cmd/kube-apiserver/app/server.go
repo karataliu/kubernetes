@@ -51,6 +51,7 @@ import (
 	"k8s.io/apiserver/pkg/server/filters"
 	"k8s.io/apiserver/pkg/server/options/encryptionconfig"
 	serverstorage "k8s.io/apiserver/pkg/server/storage"
+	"k8s.io/apiserver/pkg/storage/value/encrypt/envelope"
 	aggregatorapiserver "k8s.io/kube-aggregator/pkg/apiserver"
 	//aggregatorinformers "k8s.io/kube-aggregator/pkg/client/informers/internalversion"
 
@@ -585,6 +586,17 @@ func BuildStorageFactory(s *options.ServerRunOptions) (*serverstorage.DefaultSto
 
 	// Set up encryption at rest via transformer overrides if a configuration file was provided.
 	if len(s.Etcd.EncryptionProviderConfigFilepath) != 0 {
+		cloud, err := cloudprovider.InitCloudProvider(s.CloudProvider.CloudProvider, s.CloudProvider.CloudConfigFile)
+		if err != nil {
+			return nil, err
+		}
+		// Returns an envelope Service implemented by a KMS supported by the cloud hosting k8s.
+		cloudKMSGetter := func(name string) (envelope.Service, error) {
+			return cloud.KeyManagementService(name)
+		}
+		// Register cloud in plugin registry in case a cloudprovided KMS provider is required.
+		encryptionconfig.KMSPluginRegistry.RegisterCloudProvidedKMSPlugin(cloudKMSGetter)
+
 		transformerOverrides, err := encryptionconfig.GetTransformerOverrides(s.Etcd.EncryptionProviderConfigFilepath)
 		if err != nil {
 			return nil, err
