@@ -115,14 +115,17 @@ func GetPrefixTransformers(config *ResourceConfig) ([]value.PrefixTransformer, e
 		var err error
 
 		if provider.AESGCM != nil {
+			glog.V(3).Infoln("LOG, AESGCM")
 			transformer, err = getAESPrefixTransformer(provider.AESGCM, aestransformer.NewGCMTransformer, aesGCMTransformerPrefixV1)
 			if err != nil {
+				glog.V(3).Infof("LOG, error:%q", err)
 				return result, err
 			}
 			found = true
 		}
 
 		if provider.AESCBC != nil {
+			glog.V(3).Infoln("LOG, AESCBC")
 			if found == true {
 				return result, multipleProviderError
 			}
