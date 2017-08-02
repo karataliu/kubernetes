@@ -597,6 +597,7 @@ func BuildStorageFactory(s *options.ServerRunOptions) (*serverstorage.DefaultSto
 		// Register cloud in plugin registry in case a cloudprovided KMS provider is required.
 		encryptionconfig.KMSPluginRegistry.RegisterCloudProvidedKMSPlugin(cloudKMSGetter)
 
+		glog.V(3).Infoln("LOG EncryptionProviderConfigFilepath")
 		transformerOverrides, err := encryptionconfig.GetTransformerOverrides(s.Etcd.EncryptionProviderConfigFilepath)
 		if err != nil {
 			return nil, err

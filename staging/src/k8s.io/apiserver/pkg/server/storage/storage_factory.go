@@ -241,6 +241,7 @@ func (s *DefaultStorageFactory) getStorageGroupResource(groupResource schema.Gro
 // return an error if the group has no storage destination configured.
 func (s *DefaultStorageFactory) NewConfig(groupResource schema.GroupResource) (*storagebackend.Config, error) {
 	chosenStorageResource := s.getStorageGroupResource(groupResource)
+	glog.V(3).Infof("LOG, NewConfig, groupResource:%q, chosenStorageResource:%q", groupResource, chosenStorageResource)
 
 	// operate on copy
 	storageConfig := s.StorageConfig
