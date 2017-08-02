@@ -20,6 +20,7 @@ package value
 import (
 	"bytes"
 	"fmt"
+	"github.com/golang/glog"
 	"sync"
 )
 
@@ -123,6 +124,8 @@ func NewPrefixTransformers(err error, transformers ...PrefixTransformer) Transfo
 // the result of transforming the value. It will always mark any transformation as stale that is not using
 // the first transformer.
 func (t *prefixTransformers) TransformFromStorage(data []byte, context Context) ([]byte, bool, error) {
+	glog.V(3).Infoln("TransformFromStorage")
+
 	for i, transformer := range t.transformers {
 		if bytes.HasPrefix(data, transformer.Prefix) {
 			result, stale, err := transformer.Transformer.TransformFromStorage(data[len(transformer.Prefix):], context)
@@ -141,6 +144,8 @@ func (t *prefixTransformers) TransformFromStorage(data []byte, context Context) 
 
 // TransformToStorage uses the first transformer and adds its prefix to the data.
 func (t *prefixTransformers) TransformToStorage(data []byte, context Context) ([]byte, error) {
+	glog.V(3).Infoln("TransformToStorage")
+
 	transformer := t.transformers[0]
 	prefixedData := make([]byte, len(transformer.Prefix), len(data)+len(transformer.Prefix))
 	copy(prefixedData, transformer.Prefix)
