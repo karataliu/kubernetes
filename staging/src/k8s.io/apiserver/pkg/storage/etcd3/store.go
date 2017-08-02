@@ -161,6 +161,7 @@ func (s *store) Create(ctx context.Context, key string, obj, out runtime.Object,
 		return err
 	}
 
+	glog.V(3).Infof("LOG etcd Create")
 	newData, err := s.transformer.TransformToStorage(data, authenticatedDataString(key))
 	if err != nil {
 		return storage.NewInternalError(err.Error())

@@ -101,11 +101,14 @@ func ParseEncryptionConfiguration(f io.Reader) (map[schema.GroupResource]value.T
 	for gr, transList := range resourceToPrefixTransformer {
 		result[gr] = value.NewMutableTransformer(value.NewPrefixTransformers(fmt.Errorf("no matching prefix found"), transList...))
 	}
+
+	glog.V(3).Infof("LOG ParseEncryptionConfiguration result: %q", result)
 	return result, nil
 }
 
 // GetPrefixTransformers constructs and returns the appropriate prefix transformers for the passed resource using its configuration
 func GetPrefixTransformers(config *ResourceConfig) ([]value.PrefixTransformer, error) {
+	glog.V(3).Infoln("LOG GetPrefixTransformers")
 	var result []value.PrefixTransformer
 	multipleProviderError := fmt.Errorf("more than one provider specified in a single element, should split into different list elements")
 	for _, provider := range config.Providers {

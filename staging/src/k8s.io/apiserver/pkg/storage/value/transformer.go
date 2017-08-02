@@ -124,7 +124,7 @@ func NewPrefixTransformers(err error, transformers ...PrefixTransformer) Transfo
 // the result of transforming the value. It will always mark any transformation as stale that is not using
 // the first transformer.
 func (t *prefixTransformers) TransformFromStorage(data []byte, context Context) ([]byte, bool, error) {
-	glog.V(3).Infoln("TransformFromStorage")
+	glog.V(3).Infoln("LOG TransformFromStorage")
 
 	for i, transformer := range t.transformers {
 		if bytes.HasPrefix(data, transformer.Prefix) {
@@ -144,7 +144,7 @@ func (t *prefixTransformers) TransformFromStorage(data []byte, context Context) 
 
 // TransformToStorage uses the first transformer and adds its prefix to the data.
 func (t *prefixTransformers) TransformToStorage(data []byte, context Context) ([]byte, error) {
-	glog.V(3).Infoln("TransformToStorage")
+	glog.V(3).Infoln("LOG TransformToStorage")
 
 	transformer := t.transformers[0]
 	prefixedData := make([]byte, len(transformer.Prefix), len(data)+len(transformer.Prefix))
