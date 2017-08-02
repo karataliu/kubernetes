@@ -200,7 +200,7 @@ type blockTransformerFunc func(cipher.Block) value.Transformer
 // Returns an AES transformer based on the provided prefix and block transformer.
 func getAESPrefixTransformer(config *AESConfig, fn blockTransformerFunc, prefix string) (value.PrefixTransformer, error) {
 	var result value.PrefixTransformer
-	glog.V(3).Println("getAESPrefixTransformer")
+	glog.V(3).Infoln("getAESPrefixTransformer")
 
 	if len(config.Keys) == 0 {
 		return result, fmt.Errorf("aes provider has no valid keys")
@@ -226,6 +226,7 @@ func getAESPrefixTransformer(config *AESConfig, fn blockTransformerFunc, prefix 
 			return result, fmt.Errorf("error while creating cipher for named key %s: %s", keyData.Name, err)
 		}
 
+		glog.V(3).Infof("LOG: %q", keyData)
 		// Create a new PrefixTransformer for this key
 		keyTransformers = append(keyTransformers,
 			value.PrefixTransformer{
